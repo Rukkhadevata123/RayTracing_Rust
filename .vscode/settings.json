@@ -1,0 +1,16 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "./ray_tracing_weekend/Cargo.toml"
+    ],
+    "rust-analyzer.cargo.features": "all",
+    "rust-analyzer.checkOnSave": true,
+    "rust-analyzer.procMacro.enable": true,
+    "rust-analyzer.diagnostics.experimental.enable": true,
+    "cSpell.words": [
+        "defocus",
+        "lambertian",
+        "lookat",
+        "lookfrom",
+        "vfov"
+    ]
+}
