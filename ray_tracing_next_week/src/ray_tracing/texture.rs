@@ -1,8 +1,8 @@
-use std::sync::Arc;
 use image::{DynamicImage, GenericImageView};
+use std::sync::Arc;
 
-use super::vec3::{Color, Point3};
 use super::noise::Perlin;
+use super::vec3::{Color, Point3};
 
 pub trait Texture: Send + Sync {
     fn value(&self, u: f64, v: f64, p: &Point3) -> Color;
@@ -19,7 +19,9 @@ impl SolidColor {
     }
 
     pub fn new_rgb(r: f64, g: f64, b: f64) -> Self {
-        Self { color_value: Color::new(r, g, b) }
+        Self {
+            color_value: Color::new(r, g, b),
+        }
     }
 }
 
@@ -37,14 +39,18 @@ pub struct CheckerTexture {
 }
 
 impl CheckerTexture {
-    pub fn new(scale: f64, even: Arc<dyn Texture + Send + Sync>, odd: Arc<dyn Texture + Send + Sync>) -> Self {
+    pub fn new(
+        scale: f64,
+        even: Arc<dyn Texture + Send + Sync>,
+        odd: Arc<dyn Texture + Send + Sync>,
+    ) -> Self {
         Self {
             inv_scale: 1.0 / scale,
             even,
             odd,
         }
     }
-    
+
     pub fn new_colors(scale: f64, c1: Color, c2: Color) -> Self {
         Self {
             inv_scale: 1.0 / scale,
@@ -78,25 +84,47 @@ pub struct ImageTexture {
 }
 
 impl ImageTexture {
-    pub fn new(filename: &str) -> Self {
-        match image::open(filename) {
-            Ok(img) => {
-                let width = img.width();
-                let height = img.height();
-                Self {
-                    image: Some(img),
-                    width,
-                    height,
-                }
+    pub fn new(image_filename: &str) -> Self {
+        // 先检查环境变量
+        if let Ok(image_dir) = std::env::var("RTW_IMAGES") {
+            let path = format!("{}/{}", image_dir, image_filename);
+            if let Ok(img) = image::open(&path) {
+                return Self::from_image(img);
             }
-            Err(e) => {
-                eprintln!("Error loading image '{}': {}", filename, e);
-                Self {
-                    image: None,
-                    width: 0,
-                    height: 0,
-                }
+        }
+
+        // 尝试多个可能的路径
+        let paths = [
+            image_filename.to_string(),
+            format!("images/{}", image_filename),
+            format!("../images/{}", image_filename),
+            format!("../../images/{}", image_filename),
+            format!("../../../images/{}", image_filename),
+            format!("../../../../images/{}", image_filename),
+        ];
+
+        for path in &paths {
+            if let Ok(img) = image::open(path) {
+                return Self::from_image(img);
             }
+        }
+
+        // 如果都失败了
+        eprintln!("ERROR: Could not load image file '{}'.", image_filename);
+        Self {
+            image: None,
+            width: 0,
+            height: 0,
+        }
+    }
+
+    fn from_image(img: DynamicImage) -> Self {
+        let width = img.width();
+        let height = img.height();
+        Self {
+            image: Some(img),
+            width,
+            height,
         }
     }
 }
@@ -110,7 +138,7 @@ impl Texture for ImageTexture {
 
         // 将输入纹理坐标限制在 [0,1] × [0,1]
         let u_clamped = u.clamp(0.0, 1.0);
-        let v_clamped = 1.0 - v.clamp(0.0, 1.0);  // 翻转 V 为图像坐标
+        let v_clamped = 1.0 - v.clamp(0.0, 1.0); // 翻转 V 为图像坐标
 
         let i = (u_clamped * self.width as f64) as u32;
         let j = (v_clamped * self.height as f64) as u32;
@@ -122,14 +150,14 @@ impl Texture for ImageTexture {
         if let Some(img) = &self.image {
             let pixel = img.get_pixel(i, j);
             let color_scale = 1.0 / 255.0;
-            
+
             Color::new(
                 color_scale * pixel[0] as f64,
                 color_scale * pixel[1] as f64,
                 color_scale * pixel[2] as f64,
             )
         } else {
-            Color::new(0.0, 1.0, 1.0)  // 默认青色
+            Color::new(0.0, 1.0, 1.0) // 默认青色
         }
     }
 }
