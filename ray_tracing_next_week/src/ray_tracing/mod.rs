@@ -12,3 +12,5 @@ pub mod aabb;
 pub mod bvh;
 pub mod texture;
 pub mod noise;
+pub mod quad;
+pub mod constant_medium;

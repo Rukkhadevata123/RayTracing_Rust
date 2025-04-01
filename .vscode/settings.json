@@ -8,13 +8,16 @@
     "rust-analyzer.diagnostics.experimental.enable": true,
     "cSpell.words": [
         "aabb",
+        "accum",
         "bbox",
         "defocus",
+        "interp",
         "lambertian",
         "lookat",
         "lookfrom",
         "perlin",
         "ranvec",
+        "turb",
         "vfov"
     ]
 }

@@ -2,9 +2,9 @@ use std::sync::Arc;
 
 use super::hittable::HitRecord;
 use super::ray::Ray;
-use super::texture::{SolidColor, Texture, TexturePtr};
+use super::texture::{SolidColor, TexturePtr};
 use super::util::random_double;
-use super::vec3::{Color, Vec3, dot, reflect, refract, unit_vector};
+use super::vec3::{Color, Point3, Vec3, dot, reflect, refract, unit_vector};
 
 pub trait Material: Send + Sync {
     fn scatter(
@@ -14,6 +14,10 @@ pub trait Material: Send + Sync {
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool;
+
+    fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color {
+        Color::new(0.0, 0.0, 0.0) // 默认实现返回黑色（不发光）
+    }
 }
 
 pub struct Lambertian {
@@ -132,6 +136,71 @@ impl Material for Dielectric {
         };
 
         *scattered = Ray::new(rec.p, direction, r_in.time);
+        true
+    }
+}
+
+pub struct DiffuseLight {
+    emit: TexturePtr,
+}
+
+impl DiffuseLight {
+    pub fn new(texture: TexturePtr) -> Self {
+        Self { emit: texture }
+    }
+
+    pub fn new_color(color: Color) -> Self {
+        Self {
+            emit: Arc::new(SolidColor::new(color)),
+        }
+    }
+}
+
+impl Material for DiffuseLight {
+    fn scatter(
+        &self,
+        _r_in: &Ray,
+        _rec: &HitRecord,
+        _attenuation: &mut Color,
+        _scattered: &mut Ray,
+    ) -> bool {
+        // 光源不散射光线，只发射
+        false
+    }
+
+    fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color {
+        self.emit.value(u, v, p)
+    }
+}
+
+pub struct Isotropic {
+    albedo: TexturePtr,
+}
+
+impl Isotropic {
+    pub fn new(texture: TexturePtr) -> Self {
+        Self { albedo: texture }
+    }
+
+    pub fn new_color(color: Color) -> Self {
+        Self {
+            albedo: Arc::new(SolidColor::new(color)),
+        }
+    }
+}
+
+impl Material for Isotropic {
+    fn scatter(
+        &self,
+        r_in: &Ray,
+        rec: &HitRecord,
+        attenuation: &mut Color,
+        scattered: &mut Ray,
+    ) -> bool {
+        // 各向同性散射 - 向随机方向散射光线
+        *scattered = Ray::new(rec.p, Vec3::random_unit_vector(), r_in.time);
+        *attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
+
         true
     }
 }

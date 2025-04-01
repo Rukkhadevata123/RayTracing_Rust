@@ -4,7 +4,6 @@ use rayon::prelude::*;
 
 use super::color::{color_to_rgb_with_samples, save_image};
 use super::hittable::{HitRecord, Hittable};
-use super::hittable_list::HittableList;
 use super::interval::Interval;
 use super::ray::Ray;
 use super::util::{degrees_to_radians, random_double, random_double_range};
@@ -16,6 +15,7 @@ pub struct Camera {
     pub image_width: i32,        // 以像素计的图像宽度
     pub samples_per_pixel: i32,  // 每个像素的随机采样数
     pub max_depth: i32,          // 最大光线反射次数
+    pub background: Color,       // 背景色
     pub output_filename: String, // 输出文件名
 
     pub vfov: f64,        // 垂直视角（视场角）
@@ -49,6 +49,7 @@ impl Camera {
             image_width: 100,
             samples_per_pixel: 10,
             max_depth: 10,
+            background: Color::new(0.7, 0.8, 1.0),
             vfov: 90.0,
             lookfrom: Point3::new(0.0, 0.0, 0.0),
             lookat: Point3::new(0.0, 0.0, -1.0),
@@ -161,11 +162,11 @@ impl Camera {
 
     // 更新 ray_color 方法实现
     fn ray_color(&self, r: &Ray, depth: i32, world: &dyn Hittable) -> Color {
-        Self::ray_color_internal(r, depth, world)
+        Self::ray_color_internal(r, depth, world, &self.background)
     }
 
     // 添加静态方法处理递归逻辑
-    fn ray_color_internal(r: &Ray, depth: i32, world: &dyn Hittable) -> Color {
+    fn ray_color_internal(r: &Ray, depth: i32, world: &dyn Hittable, background: &Color) -> Color {
         // 如果达到反射次数限制，不再收集光线
         if depth <= 0 {
             return Color::new(0.0, 0.0, 0.0);
@@ -173,20 +174,22 @@ impl Camera {
 
         let mut rec = HitRecord::default();
 
-        if world.hit(r, Interval::new(0.001, f64::INFINITY), &mut rec) {
-            let mut scattered = Ray::default();
-            let mut attenuation = Color::default();
-
-            if rec.mat.scatter(r, &rec, &mut attenuation, &mut scattered) {
-                return attenuation * Self::ray_color_internal(&scattered, depth - 1, world);
-            }
-            return Color::new(0.0, 0.0, 0.0);
+        // 如果没有击中任何物体，返回背景色
+        if !world.hit(r, Interval::new(0.001, f64::INFINITY), &mut rec) {
+            return *background;
         }
 
-        // 未命中任何物体，返回背景色（简单天空渐变）
-        let unit_direction = unit_vector(&r.dir);
-        let a = 0.5 * (unit_direction.y + 1.0);
-        (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0)
+        let mut scattered = Ray::default();
+        let mut attenuation = Color::default();
+        let emission = rec.mat.emitted(rec.u, rec.v, &rec.p);
+
+        // 如果材质不散射光线，只返回发射光
+        if !rec.mat.scatter(r, &rec, &mut attenuation, &mut scattered) {
+            return emission;
+        }
+
+        // 返回发射光加上散射光
+        emission + attenuation * Self::ray_color_internal(&scattered, depth - 1, world, background)
     }
 
     fn calculate_pixel_color(&self, i: i32, j: i32, world: &dyn Hittable) -> Color {
