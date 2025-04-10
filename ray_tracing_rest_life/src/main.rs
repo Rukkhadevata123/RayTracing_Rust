@@ -143,7 +143,7 @@ fn main() {
         |x| x * x,
         |x| (8.0 * x).powf(1.0 / 3.0),
         |x| 3.0 * x * x / 8.0,
-        1000,
+        1,
     );
     println!("Monte Carlo Integral Result: {}", result);
 }
