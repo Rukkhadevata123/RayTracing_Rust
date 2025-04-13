@@ -241,6 +241,11 @@ impl Camera {
             pdf_value = pdf.value(&scattered_direction);
         }
 
+        // 在计算最终颜色之前添加
+        if pdf_value < 1e-6 || !pdf_value.is_finite() {
+            return emission;
+        }
+
         let scattered = Ray::new(rec.p, scattered_direction, r.time);
         let scattering_pdf = rec.mat.scattering_pdf(r, &rec, &scattered);
 
