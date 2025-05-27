@@ -782,7 +782,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ray_tracing_weekend"
+name = "ray_tracing_rust"
 version = "0.1.0"
 dependencies = [
  "image",
