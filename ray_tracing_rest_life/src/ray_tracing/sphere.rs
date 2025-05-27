@@ -25,7 +25,7 @@ impl Sphere {
             center: Ray::new(static_center, Vec3::zeros(), 0.0),
             radius,
             mat,
-            bbox: bbox,
+            bbox,
         }
     }
     pub fn new_moving(
@@ -122,7 +122,7 @@ impl Hittable for Sphere {
     }
     fn bounding_box(&self) -> Option<Aabb> {
         // 返回包围盒
-        Some(self.bbox.clone())
+        Some(self.bbox)
     }
 
     fn pdf_value(&self, origin: &Point3, direction: &Vec3) -> f64 {

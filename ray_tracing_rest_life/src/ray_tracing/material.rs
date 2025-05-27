@@ -32,35 +32,6 @@ pub trait Material: Send + Sync {
         false
     }
 
-    // 旧版scatter方法，为了兼容性保留
-    fn scatter_legacy(
-        &self,
-        r_in: &Ray,
-        rec: &HitRecord,
-        attenuation: &mut Color,
-        scattered: &mut Ray,
-    ) -> bool {
-        let mut srec = ScatterRecord::new();
-        if !self.scatter(r_in, rec, &mut srec) {
-            return false;
-        }
-
-        if srec.skip_pdf {
-            *scattered = srec.skip_pdf_ray;
-            *attenuation = srec.attenuation;
-        } else {
-            // 如果没有PDF就使用默认
-            let pdf = srec
-                .pdf_ptr
-                .unwrap_or_else(|| Arc::new(CosinePDF::new(&rec.normal)));
-
-            *scattered = Ray::new(rec.p, pdf.generate(), r_in.time);
-            *attenuation = srec.attenuation;
-        }
-
-        true
-    }
-
     fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Color {
         Color::new(0.0, 0.0, 0.0) // 默认实现返回黑色（不发光）
     }
@@ -92,27 +63,6 @@ impl Material for Lambertian {
         srec.attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
         srec.pdf_ptr = Some(Arc::new(CosinePDF::new(&rec.normal)));
         srec.skip_pdf = false;
-        true
-    }
-
-    // 保留旧版实现以兼容现有代码
-    fn scatter_legacy(
-        &self,
-        r_in: &Ray,
-        rec: &HitRecord,
-        attenuation: &mut Color,
-        scattered: &mut Ray,
-    ) -> bool {
-        let mut scatter_direction = rec.normal + Vec3::random_unit_vector();
-
-        // 捕获接近零的散射方向
-        if scatter_direction.near_zero() {
-            scatter_direction = rec.normal;
-        }
-
-        *scattered = Ray::new(rec.p, scatter_direction, r_in.time);
-        *attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
-
         true
     }
 
@@ -151,20 +101,6 @@ impl Material for Metal {
         srec.skip_pdf_ray = Ray::new(rec.p, direction, r_in.time);
 
         dot(&srec.skip_pdf_ray.dir, &rec.normal) > 0.0
-    }
-
-    fn scatter_legacy(
-        &self,
-        r_in: &Ray,
-        rec: &HitRecord,
-        attenuation: &mut Color,
-        scattered: &mut Ray,
-    ) -> bool {
-        let reflected = reflect(&unit_vector(&r_in.dir), &rec.normal);
-        let direction = reflected + self.fuzz * Vec3::random_unit_vector();
-        *scattered = Ray::new(rec.p, direction, r_in.time);
-        *attenuation = self.albedo;
-        dot(&scattered.dir, &rec.normal) > 0.0
     }
 }
 
@@ -212,37 +148,6 @@ impl Material for Dielectric {
 
         srec.skip_pdf_ray = Ray::new(rec.p, direction, r_in.time);
 
-        true
-    }
-
-    fn scatter_legacy(
-        &self,
-        r_in: &Ray,
-        rec: &HitRecord,
-        attenuation: &mut Color,
-        scattered: &mut Ray,
-    ) -> bool {
-        *attenuation = Color::new(1.0, 1.0, 1.0);
-        let ri = if rec.front_face {
-            1.0 / self.refraction_index
-        } else {
-            self.refraction_index
-        };
-
-        let unit_direction = unit_vector(&r_in.dir);
-        let cos_theta = f64::min(dot(&-unit_direction, &rec.normal), 1.0);
-        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
-
-        let cannot_refract = ri * sin_theta > 1.0;
-
-        // 使用 if 表达式直接初始化 direction
-        let direction = if cannot_refract || Self::reflectance(cos_theta, ri) > random_double() {
-            reflect(&unit_direction, &rec.normal)
-        } else {
-            refract(&unit_direction, &rec.normal, ri)
-        };
-
-        *scattered = Ray::new(rec.p, direction, r_in.time);
         true
     }
 }
@@ -298,20 +203,6 @@ impl Material for Isotropic {
         true
     }
 
-    fn scatter_legacy(
-        &self,
-        r_in: &Ray,
-        rec: &HitRecord,
-        attenuation: &mut Color,
-        scattered: &mut Ray,
-    ) -> bool {
-        // 各向同性散射 - 向随机方向散射光线
-        *scattered = Ray::new(rec.p, Vec3::random_unit_vector(), r_in.time);
-        *attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
-
-        true
-    }
-
     fn scattering_pdf(&self, _r_in: &Ray, _rec: &HitRecord, _scattered: &Ray) -> f64 {
         1.0 / (4.0 * std::f64::consts::PI)
     }
@@ -322,16 +213,6 @@ pub struct NoMaterial {}
 
 impl Material for NoMaterial {
     fn scatter(&self, _r_in: &Ray, _rec: &HitRecord, _srec: &mut ScatterRecord) -> bool {
-        false // 永远不散射光线
-    }
-
-    fn scatter_legacy(
-        &self,
-        _r_in: &Ray,
-        _rec: &HitRecord,
-        _attenuation: &mut Color,
-        _scattered: &mut Ray,
-    ) -> bool {
         false // 永远不散射光线
     }
 }

@@ -26,9 +26,7 @@ impl BvhNode {
 
         // 构建包含所有源对象的边界盒
         for object_index in start..end {
-            let object_bbox = objects[object_index]
-                .bounding_box()
-                .unwrap_or(Aabb::empty());
+            let object_bbox = objects[object_index].bounding_box().unwrap_or_default();
             bbox = bbox.merge(&object_bbox);
         }
 
@@ -146,8 +144,8 @@ fn box_compare(
     b: &Arc<dyn Hittable + Send + Sync>,
     axis: usize,
 ) -> Ordering {
-    let a_box = a.bounding_box().unwrap_or(Aabb::default());
-    let b_box = b.bounding_box().unwrap_or(Aabb::default());
+    let a_box = a.bounding_box().unwrap_or_default();
+    let b_box = b.bounding_box().unwrap_or_default();
 
     let a_min = a_box.axis_interval(axis).min;
     let b_min = b_box.axis_interval(axis).min;

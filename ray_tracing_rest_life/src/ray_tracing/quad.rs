@@ -109,7 +109,7 @@ impl Hittable for Quad {
     }
 
     fn bounding_box(&self) -> Option<Aabb> {
-        Some(self.bbox.clone())
+        Some(self.bbox)
     }
 
     fn pdf_value(&self, origin: &Point3, direction: &Vec3) -> f64 {

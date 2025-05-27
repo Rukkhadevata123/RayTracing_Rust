@@ -260,18 +260,6 @@ pub fn random_unit_vector() -> Vec3 {
     Vec3::random_unit_vector()
 }
 
-pub fn random_in_unit_sphere() -> Vec3 {
-    Vec3::random_in_unit_sphere()
-}
-
-pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
-    Vec3::random_on_hemisphere(normal)
-}
-
-pub fn random_in_unit_disk() -> Vec3 {
-    Vec3::random_in_unit_disk()
-}
-
 pub fn random_cosine_direction() -> Vec3 {
     Vec3::random_cosine_direction()
 }

@@ -22,7 +22,7 @@ impl HittableList {
 
     pub fn add(&mut self, object: Arc<dyn Hittable>) {
         // 先获取边界盒
-        let object_bbox = object.bounding_box().unwrap_or(Aabb::default());
+        let object_bbox = object.bounding_box().unwrap_or_default();
 
         // 计算新的合并边界盒
         self.bbox = if self.bbox.is_empty() {
@@ -58,7 +58,7 @@ impl Hittable for HittableList {
     }
 
     fn bounding_box(&self) -> Option<Aabb> {
-        Some(self.bbox.clone())
+        Some(self.bbox)
     }
 
     fn pdf_value(&self, origin: &Point3, direction: &Vec3) -> f64 {

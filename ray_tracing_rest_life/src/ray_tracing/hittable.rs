@@ -91,7 +91,7 @@ impl Hittable for Translate {
     }
 
     fn bounding_box(&self) -> Option<Aabb> {
-        Some(self.bbox.clone())
+        Some(self.bbox)
     }
 }
 
@@ -199,7 +199,7 @@ impl Hittable for RotateY {
     }
 
     fn bounding_box(&self) -> Option<Aabb> {
-        Some(self.bbox.clone())
+        Some(self.bbox)
     }
 }
 
@@ -211,12 +211,12 @@ pub trait Hittable: Send + Sync {
     }
 
     /// 计算给定方向的PDF值
-    fn pdf_value(&self, origin: &Point3, direction: &Vec3) -> f64 {
+    fn pdf_value(&self, _origin: &Point3, _direction: &Vec3) -> f64 {
         0.0 // 默认实现返回0
     }
 
     /// 从origin点生成指向该物体的随机方向
-    fn random(&self, origin: &Point3) -> Vec3 {
+    fn random(&self, _origin: &Point3) -> Vec3 {
         Vec3::new(1.0, 0.0, 0.0) // 默认实现返回某个方向
     }
 }

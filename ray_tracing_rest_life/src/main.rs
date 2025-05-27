@@ -1,19 +1,19 @@
 mod ray_tracing;
 
+use ray_tracing::bvh::BvhNode;
 use ray_tracing::camera::Camera;
+use ray_tracing::constant_medium::ConstantMedium;
 use ray_tracing::hittable::RotateY;
 use ray_tracing::hittable::Translate;
 use ray_tracing::hittable_list::HittableList;
 use ray_tracing::material::{Dielectric, DiffuseLight, Lambertian, Metal, NoMaterial};
 use ray_tracing::quad::{Quad, box_new};
 use ray_tracing::sphere::Sphere;
+use ray_tracing::texture::{ImageTexture, NoiseTexture};
 use ray_tracing::util::{random_double, random_double_range};
 use ray_tracing::vec3::{Color, Point3, Vec3};
 use std::sync::Arc;
 use std::time::Instant;
-use ray_tracing::bvh::BvhNode;
-use ray_tracing::constant_medium::ConstantMedium;
-use ray_tracing::texture::{ImageTexture, NoiseTexture};
 
 fn final_scene_next_week(image_width: u32, samples_per_pixel: u32, max_depth: i32) {
     let mut boxes1 = HittableList::new();
@@ -148,11 +148,11 @@ fn final_scene_next_week(image_width: u32, samples_per_pixel: u32, max_depth: i3
         Arc::new(NoMaterial {}), // 使用空材质代替light
     )));
 
-     lights.add(Arc::new(Sphere::new(
+    lights.add(Arc::new(Sphere::new(
         Point3::new(260.0, 150.0, 45.0),
         50.0,
         Arc::new(NoMaterial {}), // 使用空材质代替light
-     )));
+    )));
 
     // 配置相机
     let mut cam = Camera::new();
@@ -181,15 +181,16 @@ fn final_scene_next_week(image_width: u32, samples_per_pixel: u32, max_depth: i3
         "图像大小: {}x{}, 采样数: {}, 反射深度: {}",
         image_width, image_width, samples_per_pixel, max_depth
     );
-    
+
     // 在 rest_of_life 版本中，支持重要性采样
     cam.render(&world, Some(Arc::new(lights)));
     // cam.render(&world, None);
-    
+
     let duration = start.elapsed();
     eprintln!("渲染完成！总耗时: {:?}", duration);
 }
 
+#[allow(dead_code)]
 fn cornell_box_with_glass_sphere() {
     // 创建场景
     let mut world = HittableList::new();

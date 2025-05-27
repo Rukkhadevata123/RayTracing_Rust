@@ -163,8 +163,8 @@ impl Camera {
     // 分层采样
     fn sample_square_stratified(&self, s_i: i32, s_j: i32) -> Vec3 {
         // 返回[-0.5,-0.5]-[+0.5,+0.5]单位正方形内的随机点
-        let x = (s_i as f64 + random_double()) * self.recip_sqrt_spp as f64 - 0.5;
-        let y = (s_j as f64 + random_double()) * self.recip_sqrt_spp as f64 - 0.5;
+        let x = (s_i as f64 + random_double()) * self.recip_sqrt_spp - 0.5;
+        let y = (s_j as f64 + random_double()) * self.recip_sqrt_spp - 0.5;
         Vec3::new(x, y, 0.0)
     }
     // 在单位圆盘内采样

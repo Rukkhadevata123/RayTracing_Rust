@@ -67,15 +67,3 @@ impl ONB {
         )
     }
 }
-
-// 为了方便使用，添加从法线和向上方向创建ONB的函数
-impl ONB {
-    /// 从法线和向上方向创建一个正交基底
-    pub fn from_normal_and_up(normal: &Vec3, up: &Vec3) -> Self {
-        let w = unit_vector(normal);
-        let u = unit_vector(&cross(up, &w));
-        let v = cross(&w, &u);
-
-        Self { axis: [u, v, w] }
-    }
-}
