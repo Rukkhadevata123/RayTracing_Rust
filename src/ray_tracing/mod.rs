@@ -1,18 +1,12 @@
-pub mod aabb;
-pub mod bvh;
-pub mod camera;
-pub mod color;
-pub mod constant_medium;
-pub mod hittable;
-pub mod hittable_list;
-pub mod interval;
-pub mod material;
-pub mod noise;
-pub mod onb;
-pub mod pdf;
-pub mod quad;
-pub mod ray;
-pub mod sphere;
-pub mod texture;
-pub mod util;
-pub mod vec3;
+pub mod acceleration;
+pub mod geometry;
+pub mod materials;
+pub mod math;
+pub mod procedural;
+pub mod rendering;
+pub mod sampling;
+pub mod utils;
+pub mod volumes;
+
+// 重新导出常用类型
+// 避免命名空间冲突，显式重导出procedural模块的内容
