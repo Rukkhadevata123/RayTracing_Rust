@@ -4,19 +4,19 @@
 
 one weekend：
 
-![](./ray_tracing_rest_life/images/output_6.png)
+![](./images/output_6.png)
 
 光源重要性采样:
 
-![](./ray_tracing_rest_life/images/output_final_scene_800x800_5000spp.png)
+![](./images/output_final_scene_800x800_5000spp.png)
 
 无光源重要性采样:
 
-![](./ray_tracing_rest_life/images/output_final_scene_800x800_10000spp.png)
+![](./images/output_final_scene_800x800_10000spp.png)
 
 康奈尔盒子+玻璃球
 
-![](./ray_tracing_rest_life/images/output_cornell_box_glass.png)
+![](./images/output_cornell_box_glass.png)
 
 > 注意：下面的内容是Claude3.7生成的
 
