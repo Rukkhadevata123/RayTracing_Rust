@@ -91,14 +91,3 @@ impl Default for Interval {
         Self::empty()
     }
 }
-
-/// 预定义的常用区间
-pub const EMPTY: Interval = Interval {
-    min: f64::INFINITY,
-    max: f64::NEG_INFINITY,
-};
-
-pub const UNIVERSE: Interval = Interval {
-    min: f64::NEG_INFINITY,
-    max: f64::INFINITY,
-};

@@ -9,24 +9,16 @@ pub type Color = Vec3;
 
 /// Vec3扩展trait，添加光线追踪特定功能
 pub trait Vec3Ext {
-    fn random() -> Self;
     fn random_range(min: f64, max: f64) -> Self;
     fn random_unit_vector() -> Self;
     fn random_in_unit_sphere() -> Self;
     fn random_in_unit_disk() -> Self;
     fn random_cosine_direction() -> Self;
-    fn near_zero(&self) -> bool;
     fn reflect(&self, n: &Vec3) -> Vec3;
     fn refract(&self, n: &Vec3, etai_over_etat: f64) -> Vec3;
 }
 
 impl Vec3Ext for Vec3 {
-    #[inline]
-    fn random() -> Self {
-        use super::super::utils::util::random_double;
-        Self::new(random_double(), random_double(), random_double())
-    }
-
     #[inline]
     fn random_range(min: f64, max: f64) -> Self {
         use super::super::utils::util::random_double_range;
@@ -81,12 +73,6 @@ impl Vec3Ext for Vec3 {
         let z = (1.0 - r2).sqrt();
 
         Self::new(x, y, z)
-    }
-
-    #[inline]
-    fn near_zero(&self) -> bool {
-        const S: f64 = 1e-8;
-        self.x.abs() < S && self.y.abs() < S && self.z.abs() < S
     }
 
     #[inline]

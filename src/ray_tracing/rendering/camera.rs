@@ -252,16 +252,17 @@ impl Camera {
         world: &dyn Hittable,
         lights: Option<&Arc<dyn Hittable>>,
     ) -> Color {
-        let mut pixel_color = Color::zeros();
+        let total_samples = self.sqrt_spp * self.sqrt_spp;
 
-        for s_i in 0..self.sqrt_spp {
-            for s_j in 0..self.sqrt_spp {
+        (0..total_samples)
+            .into_par_iter()
+            .map(|sample_idx| {
+                let s_i = sample_idx / self.sqrt_spp;
+                let s_j = sample_idx % self.sqrt_spp;
                 let ray = self.get_ray(i, j, s_i, s_j);
-                pixel_color += self.ray_color(&ray, self.max_depth, world, lights);
-            }
-        }
-
-        pixel_color
+                self.ray_color(&ray, self.max_depth, world, lights)
+            })
+            .reduce(|| Color::zeros(), |acc, color| acc + color)
     }
 
     /// 主渲染方法
@@ -271,7 +272,7 @@ impl Camera {
         let mut img = RgbImage::new(self.image_width as u32, self.image_height as u32);
 
         // 进度条设置
-        let progress_bar = ProgressBar::new(self.image_height as u64);
+        let progress_bar = ProgressBar::new((self.image_height * self.image_width) as u64);
         progress_bar.set_style(
             ProgressStyle::default_bar()
                 .template(
@@ -281,17 +282,31 @@ impl Camera {
                 .progress_chars("#>-"),
         );
 
-        // 并行渲染
-        let pixel_colors: Vec<(i32, i32, Color)> = (0..self.image_height)
+        // 设置块大小 - 通常16x16或32x32效果较好
+        let tile_size = 16;
+        let num_tiles_x = (self.image_width + tile_size - 1) / tile_size;
+        let num_tiles_y = (self.image_height + tile_size - 1) / tile_size;
+        let total_tiles = num_tiles_x * num_tiles_y;
+
+        // 并行渲染分块
+        let pixel_colors: Vec<(i32, i32, Color)> = (0..total_tiles)
             .into_par_iter()
-            .flat_map(|j| {
-                progress_bar.inc(1);
-                (0..self.image_width)
-                    .map(|i| {
+            .flat_map(|tile_idx| {
+                let tile_x = (tile_idx % num_tiles_x) * tile_size;
+                let tile_y = (tile_idx / num_tiles_x) * tile_size;
+
+                let mut tile_results = Vec::with_capacity((tile_size * tile_size) as usize);
+
+                // 处理这个块内的所有像素
+                for j in tile_y..std::cmp::min(tile_y + tile_size, self.image_height) {
+                    for i in tile_x..std::cmp::min(tile_x + tile_size, self.image_width) {
                         let pixel_color = self.calculate_pixel_color(i, j, world, lights.as_ref());
-                        (i, j, pixel_color)
-                    })
-                    .collect::<Vec<_>>()
+                        tile_results.push((i, j, pixel_color));
+                        progress_bar.inc(1);
+                    }
+                }
+
+                tile_results
             })
             .collect();
 

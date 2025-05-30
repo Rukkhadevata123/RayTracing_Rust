@@ -13,14 +13,6 @@ impl SolidColor {
     pub const fn new(albedo: Color) -> Self {
         Self { albedo }
     }
-
-    /// 从RGB分量创建纯色纹理
-    #[inline]
-    pub fn new_rgb(r: f64, g: f64, b: f64) -> Self {
-        Self {
-            albedo: Color::new(r, g, b),
-        }
-    }
 }
 
 impl Texture for SolidColor {

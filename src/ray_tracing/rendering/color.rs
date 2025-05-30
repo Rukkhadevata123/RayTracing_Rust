@@ -49,3 +49,25 @@ pub fn color_to_rgb_with_samples(pixel_color: &Color, samples_per_pixel: i32) ->
 
     Rgb([r_byte, g_byte, b_byte])
 }
+
+// HSV到RGB转换辅助函数
+pub fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (f64, f64, f64) {
+    let h = h - h.floor(); // 归一化到[0,1]
+    let s = s.clamp(0.0, 1.0);
+    let v = v.clamp(0.0, 1.0);
+
+    let hi = (h * 6.0).floor() as i32 % 6;
+    let f = h * 6.0 - hi as f64;
+    let p = v * (1.0 - s);
+    let q = v * (1.0 - f * s);
+    let t = v * (1.0 - (1.0 - f) * s);
+
+    match hi {
+        0 => (v, t, p),
+        1 => (q, v, p),
+        2 => (p, v, t),
+        3 => (p, q, v),
+        4 => (t, p, v),
+        _ => (v, p, q),
+    }
+}

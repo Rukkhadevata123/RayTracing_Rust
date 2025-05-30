@@ -8,7 +8,7 @@ use super::super::ray_tracing::{
         vec3::{Color, Point3, Vec3, Vec3Ext},
     },
     procedural::noise::Perlin,
-    rendering::Camera,
+    rendering::{Camera, color::hsv_to_rgb},
     utils::util::random_double_range,
     volumes::ConstantMedium,
 };
@@ -206,15 +206,15 @@ pub fn final_scene_next_week(config: FinalSceneConfig) {
     eprintln!("渲染完成！总耗时: {:?}", duration);
 }
 
-/// 创建一个包含各种纹理和材质的精致测试场景
+/// 展示各种纹理效果
 pub fn texture_showcase_scene(config: FinalSceneConfig) {
     let mut world = HittableList::new();
 
-    // 使用精致的棋盘格地面（更小的格子）
-    let fine_even_texture = Arc::new(SolidColor::new(Color::new(0.2, 0.3, 0.1)));
-    let fine_odd_texture = Arc::new(SolidColor::new(Color::new(0.9, 0.9, 0.9)));
+    // 使用更精致的棋盘格地面
+    let fine_even_texture = Arc::new(SolidColor::new(Color::new(0.1, 0.25, 0.05)));
+    let fine_odd_texture = Arc::new(SolidColor::new(Color::new(0.95, 0.95, 0.9)));
     let ground_checker = Arc::new(CheckerTexture::new(
-        10.0, // 更小的格子尺寸，从100.0改为10.0
+        3.0, // 更小的格子尺寸，提高格子密度
         fine_even_texture,
         fine_odd_texture,
     ));
@@ -226,137 +226,223 @@ pub fn texture_showcase_scene(config: FinalSceneConfig) {
         ground,
     )));
 
-    // 精致的彩色棋盘格球体（更小的格子）
-    let colored_checker = Arc::new(CheckerTexture::new_rgb(
-        1.5, // 更精细的格子
-        0.8, 0.2, 0.3, // 红色
-        0.2, 0.8, 0.3, // 绿色
+    // 增加多个光源，提升照明效果
+    // 主光源（白色）
+    let main_light_texture = Arc::new(SolidColor::new(Color::new(7.0, 7.0, 7.0)));
+    let main_light = Arc::new(DiffuseLight::new(main_light_texture));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 10.0, 0.0),
+        2.0,
+        main_light,
+    )));
+
+    // 辅助光源（暖色调）
+    let warm_light_texture = Arc::new(SolidColor::new(Color::new(5.0, 3.0, 1.0)));
+    let warm_light = Arc::new(DiffuseLight::new(warm_light_texture));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(-8.0, 6.0, -5.0),
+        1.0,
+        warm_light,
+    )));
+
+    // 辅助光源（冷色调）
+    let cool_light_texture = Arc::new(SolidColor::new(Color::new(1.0, 3.0, 5.0)));
+    let cool_light = Arc::new(DiffuseLight::new(cool_light_texture));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(8.0, 5.0, -5.0),
+        1.0,
+        cool_light,
+    )));
+
+    // 中央棋盘格球体阵列 - 环形布局
+    let sphere_positions = [
+        (0.0, 1.0, 0.0),   // 中心
+        (-3.5, 1.0, -3.5), // 左后
+        (-5.0, 1.0, 0.0),  // 左
+        (-3.5, 1.0, 3.5),  // 左前
+        (0.0, 1.0, 5.0),   // 前
+        (3.5, 1.0, 3.5),   // 右前
+        (5.0, 1.0, 0.0),   // 右
+        (3.5, 1.0, -3.5),  // 右后
+        (0.0, 1.0, -5.0),  // 后
+    ];
+
+    // 中央特殊球体 - 超精细棋盘格
+    let micro_checker = Arc::new(CheckerTexture::new_rgb(
+        0.15, // 极小的格子
+        0.9, 0.1, 0.1, // 红色
+        0.1, 0.1, 0.9, // 蓝色
     ));
     world.add(Arc::new(Sphere::new(
-        Point3::new(0.0, 1.0, 0.0),
-        1.0,
-        Arc::new(Lambertian::new_texture(colored_checker)),
+        Point3::new(
+            sphere_positions[0].0,
+            sphere_positions[0].1,
+            sphere_positions[0].2,
+        ),
+        1.5, // 中心球体更大
+        Arc::new(Lambertian::new_texture(micro_checker)),
     )));
 
-    // 超精细的RGB纹理球体
-    let rgb_checker = Arc::new(CheckerTexture::new_rgb(
-        0.8, // 非常细的格子
-        0.9, 0.1, 0.1, // 亮红色
-        0.1, 0.1, 0.9, // 亮蓝色
-    ));
-    world.add(Arc::new(Sphere::new(
-        Point3::new(-2.0, 1.0, 0.0),
-        1.0,
-        Arc::new(Lambertian::new_texture(rgb_checker)),
-    )));
+    // 环绕的彩色棋盘格球体
+    for i in 1..sphere_positions.len() {
+        let checker_scale = 0.3 + (i as f64 * 0.15); // 逐渐变化的格子尺寸
+        let hue = i as f64 / sphere_positions.len() as f64; // 色调变化
 
-    // 使用SolidColor的RGB构造函数
-    let solid_color = Arc::new(SolidColor::new_rgb(0.8, 0.3, 0.9));
-    world.add(Arc::new(Sphere::new(
-        Point3::new(2.0, 1.0, 0.0),
-        1.0,
-        Arc::new(Lambertian::new_texture(solid_color)),
-    )));
+        // 为每个球体创建独特的颜色组合
+        let color1 = hsv_to_rgb(hue, 0.9, 0.9);
+        let color2 = hsv_to_rgb(hue + 0.5, 0.9, 0.9);
 
-    // 使用自定义Perlin噪声的大理石纹理球
+        let checker = Arc::new(CheckerTexture::new_rgb(
+            checker_scale,
+            color1.0,
+            color1.1,
+            color1.2,
+            color2.0,
+            color2.1,
+            color2.2,
+        ));
+
+        world.add(Arc::new(Sphere::new(
+            Point3::new(
+                sphere_positions[i].0,
+                sphere_positions[i].1,
+                sphere_positions[i].2,
+            ),
+            1.0,
+            Arc::new(Lambertian::new_texture(checker)),
+        )));
+    }
+
+    // 大理石纹理球 - 位置更佳
     let custom_noise = Perlin::new();
     let marble_texture = Arc::new(NoiseTexture::new_with_noise(custom_noise, 2.0));
     world.add(Arc::new(Sphere::new(
-        Point3::new(4.0, 1.0, 0.0),
-        1.0,
+        Point3::new(4.0, 3.5, -4.0), // 放置在高点，更加突出
+        2.0,                         // 更大的尺寸，更加醒目
         Arc::new(Lambertian::new_texture(marble_texture)),
     )));
 
-    // 各向同性材质球体（烟雾效果）- 使用自定义纹理
+    // 玻璃球与烟雾效果 - 位置更佳
     let boundary_sphere = Arc::new(Sphere::new(
-        Point3::new(-4.0, 1.0, 0.0),
-        1.0,
+        Point3::new(-4.0, 2.5, -4.0), // 对称放置
+        2.0,                          // 更大尺寸
         Arc::new(Dielectric::new(1.5)),
     ));
     world.add(boundary_sphere.clone());
 
-    // 创建自定义噪声纹理用于烟雾
     let smoke_noise = Perlin::new();
     let smoke_texture = Arc::new(NoiseTexture::new_with_noise(smoke_noise, 0.5));
     world.add(Arc::new(ConstantMedium::new(
         boundary_sphere,
-        1.5,
+        0.5, // 更合适的密度
         smoke_texture,
     )));
 
-    // 使用ONB坐标系统创建装饰性小球
+    // 原点金属球 - 增加反光度
+    world.add(Arc::new(Sphere::new(
+        Point3::origin(),
+        0.5,                                                  // 稍大些
+        Arc::new(Metal::new(Color::new(0.9, 0.8, 0.2), 0.0)), // 更亮的金色，完全镜面
+    )));
+
+    // ======= 使用ONB创建各种几何结构 =======
     let up_vector = Vec3::new(0.0, 1.0, 0.0);
     let onb = ONB::new(&up_vector);
 
-    // 创建装饰球列表，展示len和clear方法
+    // 1. 螺旋上升布局 - 使用local_to_world方法
     let mut decoration_balls = HittableList::new();
+    for i in 0..24 {
+        // 螺旋参数
+        let angle = i as f64 * 0.5; // 螺旋角度
+        let radius = 4.0; // 螺旋半径
+        let height = i as f64 * 0.2; // 高度增量
 
-    for i in 0..8 {
-        // 在局部坐标系中生成位置
-        let local_pos = Vec3::new(i as f64 * 0.3 - 1.2, 0.0, 0.0);
+        // 螺旋路径
+        let local_pos = Vec3::new(radius * angle.cos(), height, radius * angle.sin());
 
-        // 直接使用local_to_world函数转换到世界坐标系
+        // 转换到世界坐标
         let world_offset = onb.local_to_world(&local_pos);
         let world_pos = Point3::new(
             world_offset.x + 0.0,
-            world_offset.y + 0.2,
-            world_offset.z + 3.0,
+            world_offset.y + 1.0,
+            world_offset.z + 0.0,
         );
 
-        // 创建随机向量，使用Vec3Ext::random和near_zero
-        let random_color = Vec3::random();
-        let final_color = if random_color.near_zero() {
-            Color::new(0.5, 0.5, 0.5) // 如果接近零向量，使用默认颜色
-        } else {
-            Color::new(
-                random_color.x.abs(),
-                random_color.y.abs(),
-                random_color.z.abs(),
-            )
-        };
+        // 彩虹色渐变
+        let hue = i as f64 / 24.0;
+        let (r, g, b) = hsv_to_rgb(hue, 0.9, 0.9);
+        let color = Color::new(r, g, b);
 
+        let size = 0.15 + (i % 3) as f64 * 0.05; // 变化的大小
         decoration_balls.add(Arc::new(Sphere::new(
             world_pos,
-            0.08,
-            Arc::new(Metal::new(final_color, 0.0)),
+            size,
+            Arc::new(Metal::new(color, 0.0)),
         )));
     }
 
-    // 显示装饰球数量
-    eprintln!("创建装饰球数量: {}", decoration_balls.len());
+    // 2. 使用u和v创建网格状阵列 - 展示坐标系方向
+    for i in -4..5 {
+        for j in -4..5 {
+            // 只选取外围部分，形成矩形框架
+            if (i > -4 && i < 4) && (j > -4 && j < 4) {
+                continue;
+            }
 
-    // 将装饰球添加到主世界
+            // 使用u和v方法显式获取基向量
+            let u_offset = onb.u() * (i as f64 * 0.5); // u方向间距
+            let v_offset = onb.v() * (j as f64 * 0.5); // v方向间距
+
+            // 计算位置，固定在地面上方
+            let world_pos = Point3::new(
+                u_offset.x + 0.0,
+                0.5, // 高度固定
+                v_offset.z + 0.0,
+            );
+
+            // 材质根据u/v方向的梯度变化
+            let u_factor = (i as f64 + 4.0) / 8.0;
+            let v_factor = (j as f64 + 4.0) / 8.0;
+            let color = Color::new(u_factor, 0.5, v_factor);
+
+            decoration_balls.add(Arc::new(Sphere::new(
+                world_pos,
+                0.2,
+                Arc::new(Lambertian::new(color)),
+            )));
+        }
+    }
+
+    // 3. 使用world_to_local创建放射状物体
+    let center_point = Point3::new(0.0, 4.0, 0.0);
+    for i in 0..16 {
+        let angle = i as f64 * std::f64::consts::PI / 8.0;
+
+        // 创建放射状的点
+        let ray_end = center_point + Vec3::new(angle.cos() * 2.0, 0.0, angle.sin() * 2.0);
+
+        // 将世界坐标转换为ONB局部坐标
+        let local_coords = onb.world_to_local(&(ray_end - center_point));
+
+        // 使用局部坐标计算材质属性 - 从局部坐标的角度决定材质特性
+        let roughness = local_coords.y.abs() * 0.5;
+        let metal_tint = Color::new(
+            (local_coords.x + 1.0) * 0.5,
+            (local_coords.y + 1.0) * 0.5,
+            (local_coords.z + 1.0) * 0.5,
+        );
+
+        decoration_balls.add(Arc::new(Sphere::new(
+            ray_end,
+            0.15,
+            Arc::new(Metal::new(metal_tint, roughness)),
+        )));
+    }
+
+    eprintln!("创建装饰球数量: {}", decoration_balls.len());
     for ball in &decoration_balls.objects {
         world.add(ball.clone());
     }
-
-    // 添加一个位于原点的特殊球体，使用Point3Ext::origin
-    world.add(Arc::new(Sphere::new(
-        Point3::origin(), // 使用Point3Ext::origin
-        0.3,
-        Arc::new(Metal::new(Color::new(1.0, 0.8, 0.0), 0.1)),
-    )));
-
-    // 添加精致的小格子球体
-    let micro_checker = Arc::new(CheckerTexture::new_rgb(
-        0.3, // 极小的格子
-        1.0, 1.0, 0.0, // 黄色
-        0.0, 1.0, 1.0, // 青色
-    ));
-    world.add(Arc::new(Sphere::new(
-        Point3::new(6.0, 1.0, 0.0),
-        1.0,
-        Arc::new(Lambertian::new_texture(micro_checker)),
-    )));
-
-    // 添加使用DiffuseLight::new的光源
-    let light_texture = Arc::new(SolidColor::new(Color::new(4.0, 4.0, 4.0)));
-    let light = Arc::new(DiffuseLight::new(light_texture));
-    world.add(Arc::new(Sphere::new(
-        Point3::new(0.0, 7.0, 0.0),
-        2.0,
-        light,
-    )));
 
     // 配置相机
     let mut camera = Camera::new();
@@ -364,18 +450,20 @@ pub fn texture_showcase_scene(config: FinalSceneConfig) {
     camera.image_width = config.image_width;
     camera.samples_per_pixel = config.samples_per_pixel;
     camera.max_depth = config.max_depth;
-    camera.background = Color::new(0.7, 0.8, 1.0);
+    camera.background = Color::new(0.05, 0.05, 0.1); // 更深沉的背景色
 
-    camera.vfov = 20.0;
-    camera.lookfrom = Point3::new(15.0, 3.0, 5.0); // 调整相机位置以更好地观看精致细节
-    camera.lookat = Point3::new(0.0, 0.0, 0.0);
+    // 更好的相机角度
+    camera.vfov = 30.0;
+    camera.lookfrom = Point3::new(10.0, 6.0, 10.0);
+    camera.lookat = Point3::new(0.0, 1.0, 0.0);
     camera.vup = Vec3::new(0.0, 1.0, 0.0);
-    camera.defocus_angle = 0.0;
+    camera.defocus_angle = 0.1; // 轻微景深效果
+    camera.focus_dist = 12.0;
     camera.output_filename = "texture_showcase.png".to_string();
 
     let start = Instant::now();
     eprintln!("开始渲染精致纹理展示场景...");
-    eprintln!("场景包含 {} 个物体", world.len()); // 使用len方法
+    eprintln!("场景包含 {} 个物体", world.len());
 
     camera.render(&world, None);
 
