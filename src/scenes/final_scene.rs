@@ -1,9 +1,13 @@
 use super::super::ray_tracing::{
     acceleration::BvhNode,
     geometry::{HittableList, Quad, RotateY, Sphere, Translate, box_new},
-    materials::texture::{ImageTexture, NoiseTexture},
+    materials::texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor},
     materials::{Dielectric, DiffuseLight, Lambertian, Metal, NoMaterial},
-    math::vec3::{Color, Point3, Vec3, Vec3Ext},
+    math::{
+        onb::ONB,
+        vec3::{Color, Point3, Vec3, Vec3Ext},
+    },
+    procedural::noise::Perlin,
     rendering::Camera,
     utils::util::random_double_range,
     volumes::ConstantMedium,
@@ -200,4 +204,181 @@ pub fn final_scene_next_week(config: FinalSceneConfig) {
 
     let duration = start.elapsed();
     eprintln!("渲染完成！总耗时: {:?}", duration);
+}
+
+/// 创建一个包含各种纹理和材质的精致测试场景
+pub fn texture_showcase_scene(config: FinalSceneConfig) {
+    let mut world = HittableList::new();
+
+    // 使用精致的棋盘格地面（更小的格子）
+    let fine_even_texture = Arc::new(SolidColor::new(Color::new(0.2, 0.3, 0.1)));
+    let fine_odd_texture = Arc::new(SolidColor::new(Color::new(0.9, 0.9, 0.9)));
+    let ground_checker = Arc::new(CheckerTexture::new(
+        10.0, // 更小的格子尺寸，从100.0改为10.0
+        fine_even_texture,
+        fine_odd_texture,
+    ));
+    let ground = Arc::new(Lambertian::new_texture(ground_checker));
+
+    world.add(Arc::new(box_new(
+        Point3::new(-1000.0, -1.0, -1000.0),
+        Point3::new(1000.0, 0.0, 1000.0),
+        ground,
+    )));
+
+    // 精致的彩色棋盘格球体（更小的格子）
+    let colored_checker = Arc::new(CheckerTexture::new_rgb(
+        1.5, // 更精细的格子
+        0.8, 0.2, 0.3, // 红色
+        0.2, 0.8, 0.3, // 绿色
+    ));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 1.0, 0.0),
+        1.0,
+        Arc::new(Lambertian::new_texture(colored_checker)),
+    )));
+
+    // 超精细的RGB纹理球体
+    let rgb_checker = Arc::new(CheckerTexture::new_rgb(
+        0.8, // 非常细的格子
+        0.9, 0.1, 0.1, // 亮红色
+        0.1, 0.1, 0.9, // 亮蓝色
+    ));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(-2.0, 1.0, 0.0),
+        1.0,
+        Arc::new(Lambertian::new_texture(rgb_checker)),
+    )));
+
+    // 使用SolidColor的RGB构造函数
+    let solid_color = Arc::new(SolidColor::new_rgb(0.8, 0.3, 0.9));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(2.0, 1.0, 0.0),
+        1.0,
+        Arc::new(Lambertian::new_texture(solid_color)),
+    )));
+
+    // 使用自定义Perlin噪声的大理石纹理球
+    let custom_noise = Perlin::new();
+    let marble_texture = Arc::new(NoiseTexture::new_with_noise(custom_noise, 2.0));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(4.0, 1.0, 0.0),
+        1.0,
+        Arc::new(Lambertian::new_texture(marble_texture)),
+    )));
+
+    // 各向同性材质球体（烟雾效果）- 使用自定义纹理
+    let boundary_sphere = Arc::new(Sphere::new(
+        Point3::new(-4.0, 1.0, 0.0),
+        1.0,
+        Arc::new(Dielectric::new(1.5)),
+    ));
+    world.add(boundary_sphere.clone());
+
+    // 创建自定义噪声纹理用于烟雾
+    let smoke_noise = Perlin::new();
+    let smoke_texture = Arc::new(NoiseTexture::new_with_noise(smoke_noise, 0.5));
+    world.add(Arc::new(ConstantMedium::new(
+        boundary_sphere,
+        1.5,
+        smoke_texture,
+    )));
+
+    // 使用ONB坐标系统创建装饰性小球
+    let up_vector = Vec3::new(0.0, 1.0, 0.0);
+    let onb = ONB::new(&up_vector);
+
+    // 创建装饰球列表，展示len和clear方法
+    let mut decoration_balls = HittableList::new();
+
+    for i in 0..8 {
+        // 在局部坐标系中生成位置
+        let local_pos = Vec3::new(i as f64 * 0.3 - 1.2, 0.0, 0.0);
+
+        // 直接使用local_to_world函数转换到世界坐标系
+        let world_offset = onb.local_to_world(&local_pos);
+        let world_pos = Point3::new(
+            world_offset.x + 0.0,
+            world_offset.y + 0.2,
+            world_offset.z + 3.0,
+        );
+
+        // 创建随机向量，使用Vec3Ext::random和near_zero
+        let random_color = Vec3::random();
+        let final_color = if random_color.near_zero() {
+            Color::new(0.5, 0.5, 0.5) // 如果接近零向量，使用默认颜色
+        } else {
+            Color::new(
+                random_color.x.abs(),
+                random_color.y.abs(),
+                random_color.z.abs(),
+            )
+        };
+
+        decoration_balls.add(Arc::new(Sphere::new(
+            world_pos,
+            0.08,
+            Arc::new(Metal::new(final_color, 0.0)),
+        )));
+    }
+
+    // 显示装饰球数量
+    eprintln!("创建装饰球数量: {}", decoration_balls.len());
+
+    // 将装饰球添加到主世界
+    for ball in &decoration_balls.objects {
+        world.add(ball.clone());
+    }
+
+    // 添加一个位于原点的特殊球体，使用Point3Ext::origin
+    world.add(Arc::new(Sphere::new(
+        Point3::origin(), // 使用Point3Ext::origin
+        0.3,
+        Arc::new(Metal::new(Color::new(1.0, 0.8, 0.0), 0.1)),
+    )));
+
+    // 添加精致的小格子球体
+    let micro_checker = Arc::new(CheckerTexture::new_rgb(
+        0.3, // 极小的格子
+        1.0, 1.0, 0.0, // 黄色
+        0.0, 1.0, 1.0, // 青色
+    ));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(6.0, 1.0, 0.0),
+        1.0,
+        Arc::new(Lambertian::new_texture(micro_checker)),
+    )));
+
+    // 添加使用DiffuseLight::new的光源
+    let light_texture = Arc::new(SolidColor::new(Color::new(4.0, 4.0, 4.0)));
+    let light = Arc::new(DiffuseLight::new(light_texture));
+    world.add(Arc::new(Sphere::new(
+        Point3::new(0.0, 7.0, 0.0),
+        2.0,
+        light,
+    )));
+
+    // 配置相机
+    let mut camera = Camera::new();
+    camera.aspect_ratio = 16.0 / 9.0;
+    camera.image_width = config.image_width;
+    camera.samples_per_pixel = config.samples_per_pixel;
+    camera.max_depth = config.max_depth;
+    camera.background = Color::new(0.7, 0.8, 1.0);
+
+    camera.vfov = 20.0;
+    camera.lookfrom = Point3::new(15.0, 3.0, 5.0); // 调整相机位置以更好地观看精致细节
+    camera.lookat = Point3::new(0.0, 0.0, 0.0);
+    camera.vup = Vec3::new(0.0, 1.0, 0.0);
+    camera.defocus_angle = 0.0;
+    camera.output_filename = "texture_showcase.png".to_string();
+
+    let start = Instant::now();
+    eprintln!("开始渲染精致纹理展示场景...");
+    eprintln!("场景包含 {} 个物体", world.len()); // 使用len方法
+
+    camera.render(&world, None);
+
+    let duration = start.elapsed();
+    eprintln!("精致纹理展示场景渲染完成！总耗时: {:?}", duration);
 }

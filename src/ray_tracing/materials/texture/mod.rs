@@ -15,6 +15,7 @@ pub trait Texture: Send + Sync + std::fmt::Debug {
 pub type TexturePtr = Arc<dyn Texture>;
 
 // 重新导出所有纹理类型
+pub use checker::CheckerTexture;
 pub use image::ImageTexture;
 pub use noise::NoiseTexture;
 pub use solid_color::SolidColor;

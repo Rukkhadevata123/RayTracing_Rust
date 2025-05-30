@@ -6,6 +6,7 @@ pub mod sphere_pdf;
 use super::super::math::vec3::Vec3;
 
 /// 概率密度函数trait，用于重要性采样
+#[allow(clippy::upper_case_acronyms)]
 pub trait PDF: Send + Sync + std::fmt::Debug {
     /// 计算给定方向的概率密度值
     fn value(&self, direction: &Vec3) -> f64;

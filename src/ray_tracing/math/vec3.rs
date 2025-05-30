@@ -101,15 +101,3 @@ impl Vec3Ext for Vec3 {
         r_out_perp + r_out_parallel
     }
 }
-
-/// Point3扩展trait
-pub trait Point3Ext {
-    fn origin() -> Self;
-}
-
-impl Point3Ext for Point3 {
-    #[inline]
-    fn origin() -> Self {
-        Point3::new(0.0, 0.0, 0.0)
-    }
-}

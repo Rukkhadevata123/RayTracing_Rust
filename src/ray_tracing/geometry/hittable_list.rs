@@ -33,12 +33,6 @@ impl HittableList {
         self.objects.push(object);
     }
 
-    /// 清空列表
-    pub fn clear(&mut self) {
-        self.objects.clear();
-        self.bbox = Aabb::empty();
-    }
-
     /// 获取物体数量
     #[inline]
     pub fn len(&self) -> usize {

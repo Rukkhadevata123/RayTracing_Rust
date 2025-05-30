@@ -15,12 +15,7 @@ impl MixturePDF {
     /// 创建等权重的混合PDF
     #[inline]
     pub fn new(pdf1: Arc<dyn PDF>, pdf2: Arc<dyn PDF>) -> Self {
-        Self {
-            pdf1,
-            pdf2,
-            weight1: 0.5,
-            weight2: 0.5,
-        }
+        Self::new_weighted(pdf1, pdf2, 0.5)
     }
 
     /// 创建带权重的混合PDF

@@ -56,23 +56,3 @@ impl Texture for CheckerTexture {
         }
     }
 }
-
-/// 创建标准黑白棋盘格纹理的便利函数
-#[inline]
-pub fn checkerboard(scale: f64) -> CheckerTexture {
-    CheckerTexture::new_colors(
-        scale,
-        Color::new(0.0, 0.0, 0.0), // 黑色
-        Color::new(1.0, 1.0, 1.0), // 白色
-    )
-}
-
-/// 创建彩色棋盘格纹理的便利函数
-#[inline]
-pub fn colored_checkerboard(scale: f64) -> CheckerTexture {
-    CheckerTexture::new_colors(
-        scale,
-        Color::new(0.2, 0.3, 0.1), // 深绿色
-        Color::new(0.9, 0.9, 0.9), // 浅灰色
-    )
-}

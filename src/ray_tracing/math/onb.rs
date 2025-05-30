@@ -2,6 +2,7 @@ use super::vec3::Vec3;
 
 /// 正交基底 (Orthonormal Basis)
 #[derive(Debug, Clone, Copy)]
+#[allow(clippy::upper_case_acronyms)]
 pub struct ONB {
     axis: [Vec3; 3],
 }

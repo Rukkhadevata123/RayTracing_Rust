@@ -39,7 +39,7 @@ impl Hittable for Translate {
         }
 
         // 将交点位置转换回世界坐标系
-        rec.p = rec.p + self.offset;
+        rec.p += self.offset;
         true
     }
 

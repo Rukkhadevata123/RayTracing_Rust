@@ -43,7 +43,7 @@ impl Perlin {
 
         // 获取8个相邻格点的梯度向量
         let mut c = [[[Vec3::zeros(); 2]; 2]; 2];
-
+        #[allow(clippy::needless_range_loop)]
         for di in 0..2 {
             for dj in 0..2 {
                 for dk in 0..2 {
@@ -69,7 +69,7 @@ impl Perlin {
         for _ in 0..depth {
             accum += weight * self.noise(&temp_p);
             weight *= 0.5;
-            temp_p = temp_p * 2.0;
+            temp_p *= 2.0;
         }
 
         accum.abs()
@@ -100,7 +100,7 @@ impl Perlin {
         let ww = w * w * (3.0 - 2.0 * w);
 
         let mut accum = 0.0;
-
+        #[allow(clippy::needless_range_loop)]
         // 三线性插值
         for i in 0..2 {
             for j in 0..2 {
