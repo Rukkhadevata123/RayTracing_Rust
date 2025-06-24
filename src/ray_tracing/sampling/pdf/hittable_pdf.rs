@@ -1,6 +1,6 @@
-use super::super::super::geometry::hittable::Hittable;
-use super::super::super::math::vec3::*;
 use super::PDF;
+use crate::ray_tracing::geometry::hittable::Hittable;
+use crate::ray_tracing::math::vec3::*;
 use std::sync::Arc;
 
 /// 基于几何体的PDF，用于光源采样

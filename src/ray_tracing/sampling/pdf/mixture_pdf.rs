@@ -1,6 +1,6 @@
-use super::super::super::math::vec3::Vec3;
-use super::super::super::utils::util::random_double;
 use super::PDF;
+use crate::ray_tracing::math::vec3::Vec3;
+use crate::ray_tracing::utils::random::random_double;
 use std::sync::Arc;
 
 /// 混合PDF，组合两种不同的采样策略

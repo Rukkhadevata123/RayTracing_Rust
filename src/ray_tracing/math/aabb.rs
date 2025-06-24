@@ -1,4 +1,6 @@
-use super::{interval::Interval, ray::Ray, vec3::*};
+use super::interval::Interval;
+use super::ray::Ray;
+use super::vec3::*;
 use std::ops::Add;
 
 #[derive(Debug, Clone, Copy)]

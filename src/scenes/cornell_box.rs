@@ -1,9 +1,14 @@
-use super::super::ray_tracing::{
-    geometry::{HittableList, Quad, RotateY, Sphere, Translate, box_new},
-    materials::{Dielectric, DiffuseLight, Lambertian, NoMaterial},
-    math::vec3::{Color, Point3, Vec3},
-    rendering::Camera,
-};
+use crate::ray_tracing::geometry::hittable_list::HittableList;
+use crate::ray_tracing::geometry::quad::{Quad, box_new};
+use crate::ray_tracing::geometry::sphere::Sphere;
+use crate::ray_tracing::geometry::transforms::rotate_y::RotateY;
+use crate::ray_tracing::geometry::transforms::translate::Translate;
+use crate::ray_tracing::materials::dielectric::Dielectric;
+use crate::ray_tracing::materials::diffuse_light::DiffuseLight;
+use crate::ray_tracing::materials::lambertian::Lambertian;
+use crate::ray_tracing::materials::material::NoMaterial;
+use crate::ray_tracing::math::vec3::{Color, Point3, Vec3};
+use crate::ray_tracing::rendering::camera::Camera;
 use std::sync::Arc;
 use std::time::Instant;
 

@@ -1,7 +1,11 @@
-use super::super::materials::material::Material;
-use super::super::math::{aabb::Aabb, interval::Interval, onb::ONB, ray::Ray, vec3::*};
-use super::super::utils::util::random_double;
 use super::hittable::{HitRecord, Hittable};
+use crate::ray_tracing::materials::material::Material;
+use crate::ray_tracing::math::aabb::Aabb;
+use crate::ray_tracing::math::interval::Interval;
+use crate::ray_tracing::math::onb::ONB;
+use crate::ray_tracing::math::ray::Ray;
+use crate::ray_tracing::math::vec3::*;
+use crate::ray_tracing::utils::random::random_double;
 use std::sync::Arc;
 
 /// 球体几何体

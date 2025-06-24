@@ -1,6 +1,7 @@
-use super::super::geometry::hittable::HitRecord;
-use super::super::math::{ray::Ray, vec3::*};
-use super::super::sampling::pdf::PDF;
+use crate::ray_tracing::geometry::hittable::HitRecord;
+use crate::ray_tracing::math::ray::Ray;
+use crate::ray_tracing::math::vec3::*;
+use crate::ray_tracing::sampling::pdf::PDF;
 use std::sync::Arc;
 
 /// 散射记录，包含材质散射的所有信息

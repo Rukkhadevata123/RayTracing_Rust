@@ -1,6 +1,5 @@
-use super::super::super::math::vec3::{Color, Point3};
-use super::Texture;
-use super::solid_color::SolidColor;
+use super::{SolidColor, Texture};
+use crate::ray_tracing::math::vec3::{Color, Point3};
 use std::sync::Arc;
 
 /// 棋盘格纹理

@@ -11,7 +11,3 @@
 
 pub mod ray_tracing;
 pub mod scenes;
-
-// 重新导出主要模块
-pub use ray_tracing::*;
-pub use scenes::*;

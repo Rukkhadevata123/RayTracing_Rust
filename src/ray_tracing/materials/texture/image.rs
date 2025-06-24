@@ -1,7 +1,6 @@
-use super::super::super::math::vec3::{Color, Point3};
 use super::Texture;
+use crate::ray_tracing::math::vec3::{Color, Point3};
 use image::{DynamicImage, GenericImageView};
-
 /// 图像纹理
 #[derive(Debug)]
 pub struct ImageTexture {

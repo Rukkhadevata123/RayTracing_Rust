@@ -1,5 +1,5 @@
+use crate::ray_tracing::utils::random::{random_double, random_double_range};
 use nalgebra::{Point3 as NalgebraPoint3, Vector3 as NalgebraVector3};
-
 /// 3D向量类型
 pub type Vec3 = NalgebraVector3<f64>;
 /// 3D点类型
@@ -21,7 +21,6 @@ pub trait Vec3Ext {
 impl Vec3Ext for Vec3 {
     #[inline]
     fn random_range(min: f64, max: f64) -> Self {
-        use super::super::utils::util::random_double_range;
         Self::new(
             random_double_range(min, max),
             random_double_range(min, max),
@@ -49,7 +48,6 @@ impl Vec3Ext for Vec3 {
     }
 
     fn random_in_unit_disk() -> Self {
-        use super::super::utils::util::random_double_range;
         loop {
             let p = Self::new(
                 random_double_range(-1.0, 1.0),
@@ -63,7 +61,6 @@ impl Vec3Ext for Vec3 {
     }
 
     fn random_cosine_direction() -> Self {
-        use super::super::utils::util::random_double;
         let r1 = random_double();
         let r2 = random_double();
         let phi = 2.0 * std::f64::consts::PI * r1;

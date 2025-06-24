@@ -1,8 +1,10 @@
-use super::super::geometry::{
-    hittable::{HitRecord, Hittable},
-    hittable_list::HittableList,
-};
-use super::super::math::{aabb::Aabb, interval::Interval, ray::Ray, vec3::*};
+use crate::ray_tracing::geometry::hittable::{HitRecord, Hittable};
+use crate::ray_tracing::geometry::hittable_list::HittableList;
+use crate::ray_tracing::math::aabb::Aabb;
+use crate::ray_tracing::math::interval::Interval;
+use crate::ray_tracing::math::ray::Ray;
+use crate::ray_tracing::math::vec3::*;
+use crate::ray_tracing::utils::random::random_double;
 use std::cmp::Ordering;
 use std::sync::Arc;
 
@@ -116,7 +118,6 @@ impl Hittable for BvhNode {
     #[inline]
     fn random(&self, origin: &Point3) -> Vec3 {
         // 随机选择左右子树
-        use super::super::utils::util::random_double;
         if random_double() < 0.5 {
             self.left.random(origin)
         } else {

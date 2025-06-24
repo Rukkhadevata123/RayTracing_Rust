@@ -1,4 +1,5 @@
-use super::super::math::{interval::Interval, vec3::Color};
+use crate::ray_tracing::math::interval::Interval;
+use crate::ray_tracing::math::vec3::Color;
 use image::Rgb;
 
 /// 线性颜色值转换为伽马校正值（伽马值为2.0）

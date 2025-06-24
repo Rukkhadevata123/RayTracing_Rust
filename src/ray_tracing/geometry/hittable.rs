@@ -1,5 +1,8 @@
-use super::super::materials::material::Material;
-use super::super::math::{aabb::Aabb, interval::Interval, ray::Ray, vec3::*};
+use crate::ray_tracing::materials::material::{Material, NoMaterial};
+use crate::ray_tracing::math::aabb::Aabb;
+use crate::ray_tracing::math::interval::Interval;
+use crate::ray_tracing::math::ray::Ray;
+use crate::ray_tracing::math::vec3::*;
 use std::sync::Arc;
 
 /// 命中记录，包含光线与物体交点的所有信息
@@ -81,7 +84,7 @@ impl Default for HitRecord {
         Self::new(
             Point3::origin(),
             Vec3::new(0.0, 0.0, 0.0),
-            Arc::new(super::super::materials::material::NoMaterial),
+            Arc::new(NoMaterial),
             0.0,
             0.0,
             0.0,

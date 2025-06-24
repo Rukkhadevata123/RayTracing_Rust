@@ -1,8 +1,9 @@
-use super::super::geometry::hittable::HitRecord;
-use super::super::math::{ray::Ray, vec3::*};
-use super::super::sampling::pdf::CosinePDF;
 use super::material::{Material, ScatterRecord};
-use super::texture::TexturePtr;
+use super::texture::{SolidColor, TexturePtr};
+use crate::ray_tracing::geometry::hittable::HitRecord;
+use crate::ray_tracing::math::ray::Ray;
+use crate::ray_tracing::math::vec3::*;
+use crate::ray_tracing::sampling::pdf::CosinePDF;
 use std::sync::Arc;
 
 /// 朗伯材质（理想漫反射）
@@ -15,7 +16,7 @@ impl Lambertian {
     #[inline]
     pub fn new(albedo: Color) -> Self {
         Self {
-            albedo: Arc::new(super::texture::SolidColor::new(albedo)),
+            albedo: Arc::new(SolidColor::new(albedo)),
         }
     }
 

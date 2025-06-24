@@ -1,6 +1,9 @@
-use super::super::super::math::{aabb::Aabb, interval::Interval, ray::Ray, vec3::*};
-use super::super::super::utils::util::degrees_to_radians;
 use super::super::hittable::{HitRecord, Hittable};
+use crate::ray_tracing::math::aabb::Aabb;
+use crate::ray_tracing::math::interval::Interval;
+use crate::ray_tracing::math::ray::Ray;
+use crate::ray_tracing::math::vec3::*;
+use crate::ray_tracing::utils::random::degrees_to_radians;
 use std::sync::Arc;
 
 /// Y轴旋转变换

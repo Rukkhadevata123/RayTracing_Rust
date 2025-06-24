@@ -1,5 +1,5 @@
-use super::super::super::math::vec3::*;
 use super::PDF;
+use crate::ray_tracing::math::vec3::*;
 
 /// 均匀球面分布PDF，用于各向同性散射
 #[derive(Debug, Default)]

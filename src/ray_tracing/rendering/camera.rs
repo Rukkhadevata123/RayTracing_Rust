@@ -1,9 +1,11 @@
-use super::super::geometry::hittable::{HitRecord, Hittable};
-use super::super::materials::material::ScatterRecord;
-use super::super::math::{interval::Interval, ray::Ray, vec3::*};
-use super::super::sampling::pdf::{HittablePDF, MixturePDF, PDF};
-use super::super::utils::util::{degrees_to_radians, random_double, random_double_range};
 use super::color::color_to_rgb_with_samples;
+use crate::ray_tracing::geometry::hittable::{HitRecord, Hittable};
+use crate::ray_tracing::materials::material::ScatterRecord;
+use crate::ray_tracing::math::interval::Interval;
+use crate::ray_tracing::math::ray::Ray;
+use crate::ray_tracing::math::vec3::*;
+use crate::ray_tracing::sampling::pdf::{HittablePDF, MixturePDF, PDF};
+use crate::ray_tracing::utils::random::{degrees_to_radians, random_double, random_double_range};
 use image::RgbImage;
 use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
@@ -262,7 +264,7 @@ impl Camera {
                 let ray = self.get_ray(i, j, s_i, s_j);
                 self.ray_color(&ray, self.max_depth, world, lights)
             })
-            .reduce(|| Color::zeros(), |acc, color| acc + color)
+            .reduce(Color::zeros, |acc, color| acc + color)
     }
 
     /// 主渲染方法

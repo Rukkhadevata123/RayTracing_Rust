@@ -1,6 +1,6 @@
-use super::super::super::math::vec3::{Color, Point3};
-use super::super::super::procedural::noise::Perlin;
 use super::Texture;
+use crate::ray_tracing::math::vec3::{Color, Point3};
+use crate::ray_tracing::procedural::noise::Perlin;
 
 /// 噪声纹理，基于Perlin噪声生成程序化纹理
 #[derive(Debug)]

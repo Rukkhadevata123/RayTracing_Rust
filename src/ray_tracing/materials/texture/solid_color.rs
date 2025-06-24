@@ -1,5 +1,5 @@
-use super::super::super::math::vec3::{Color, Point3};
 use super::Texture;
+use crate::ray_tracing::math::vec3::{Color, Point3};
 
 /// 纯色纹理
 #[derive(Debug, Clone)]

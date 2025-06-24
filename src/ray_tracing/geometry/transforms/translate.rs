@@ -1,5 +1,8 @@
-use super::super::super::math::{aabb::Aabb, interval::Interval, ray::Ray, vec3::*};
 use super::super::hittable::{HitRecord, Hittable};
+use crate::ray_tracing::math::aabb::Aabb;
+use crate::ray_tracing::math::interval::Interval;
+use crate::ray_tracing::math::ray::Ray;
+use crate::ray_tracing::math::vec3::*;
 use std::sync::Arc;
 
 /// 平移变换

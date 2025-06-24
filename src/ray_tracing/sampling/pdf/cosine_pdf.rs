@@ -1,5 +1,6 @@
-use super::super::super::math::{onb::ONB, vec3::*};
 use super::PDF;
+use crate::ray_tracing::math::onb::ONB;
+use crate::ray_tracing::math::vec3::*;
 
 /// 余弦分布PDF，用于漫反射材质
 #[derive(Debug)]

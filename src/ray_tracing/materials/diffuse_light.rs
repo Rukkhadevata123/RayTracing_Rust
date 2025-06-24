@@ -1,7 +1,8 @@
-use super::super::geometry::hittable::HitRecord;
-use super::super::math::{ray::Ray, vec3::*};
 use super::material::{Material, ScatterRecord};
 use super::texture::{SolidColor, TexturePtr};
+use crate::ray_tracing::geometry::hittable::HitRecord;
+use crate::ray_tracing::math::ray::Ray;
+use crate::ray_tracing::math::vec3::*;
 use std::sync::Arc;
 
 /// 漫射光源材质

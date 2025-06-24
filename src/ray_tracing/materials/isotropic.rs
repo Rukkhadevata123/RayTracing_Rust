@@ -1,8 +1,9 @@
-use super::super::geometry::hittable::HitRecord;
-use super::super::math::{ray::Ray, vec3::*};
-use super::super::sampling::pdf::SpherePDF;
 use super::material::{Material, ScatterRecord};
 use super::texture::{SolidColor, TexturePtr};
+use crate::ray_tracing::geometry::hittable::HitRecord;
+use crate::ray_tracing::math::ray::Ray;
+use crate::ray_tracing::math::vec3::*;
+use crate::ray_tracing::sampling::pdf::SpherePDF;
 use std::sync::Arc;
 
 /// 各向同性散射材质，用于体积介质

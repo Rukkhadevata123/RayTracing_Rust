@@ -1,5 +1,5 @@
-use super::super::math::vec3::{Point3, Vec3, Vec3Ext};
-use super::super::utils::util::random_int_range;
+use crate::ray_tracing::math::vec3::{Point3, Vec3, Vec3Ext};
+use crate::ray_tracing::utils::random::random_int_range;
 
 /// Perlin噪声生成器，用于程序化纹理
 #[derive(Debug)]

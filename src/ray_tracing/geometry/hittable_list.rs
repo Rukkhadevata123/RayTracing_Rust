@@ -1,6 +1,9 @@
-use super::super::math::{aabb::Aabb, interval::Interval, ray::Ray, vec3::*};
-use super::super::utils::util::random_int_range;
 use super::hittable::{HitRecord, Hittable};
+use crate::ray_tracing::math::aabb::Aabb;
+use crate::ray_tracing::math::interval::Interval;
+use crate::ray_tracing::math::ray::Ray;
+use crate::ray_tracing::math::vec3::*;
+use crate::ray_tracing::utils::random::random_int_range;
 use std::sync::Arc;
 
 /// 可命中物体列表
