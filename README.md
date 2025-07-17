@@ -106,6 +106,10 @@ let config = CornellBoxConfig {
 
 ## Rendering Examples
 
+### First Demo
+
+![](./images/30min.png)
+
 ### Cornell Box with Glass Sphere
 
 ![Cornell Box](./images/output_cornell_box_glass.png)
