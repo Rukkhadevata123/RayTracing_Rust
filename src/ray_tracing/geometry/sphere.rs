@@ -105,7 +105,7 @@ impl Hittable for Sphere {
 
         rec.t = root;
         rec.p = r.at(rec.t);
-        // 计算 UV 坐标 - 修复类型不匹配
+        // 计算 UV 坐标
         let outward_normal_vec = (rec.p - current_center) / self.radius;
         let (u, v) = Self::get_sphere_uv(&outward_normal_vec);
         rec.u = u;
